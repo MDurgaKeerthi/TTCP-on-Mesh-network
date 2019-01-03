@@ -1,5 +1,4 @@
-/************* server CODE *******************/
-
+/************* SERVER CODE *******************/
 
 #include <stdio.h>
 #include <sys/socket.h>
@@ -17,12 +16,13 @@
 #include <iostream>
 #include <string>
 #include <algorithm>
-
 #include <mysql/mysql.h>
 #include <cstdio>
 
 using namespace std;
 
+
+// Data Structures for Packet
 struct control_block{
    int CCsend;
    int CCrecv;
@@ -46,8 +46,6 @@ enum option_names{
    lastack
 };
 
-//server will not recieve syn_ack, fyn_ack,syn_fyn_ack,cc_echo
-
 struct packet{
    int src_port;
    int dest_port;
@@ -63,6 +61,8 @@ struct packet{
    int packnum;
    char text[32];
 };
+
+
 
 class TTCP{
    public:  
@@ -89,6 +89,7 @@ class TTCP{
    MYSQL_RES *res;
    MYSQL_ROW row;
 
+   // Initializing
    TTCP(const char* serverip){
       char *server = "127.0.0.1";
       char *user = "root";
@@ -132,12 +133,12 @@ class TTCP{
    
    } //end of constructor
 
+   // Function to read data
    void thdread(){
       int somen;
       struct packet *recvmsg = (struct packet *)malloc(sizeof(struct packet));
       while(1){
          somen = recvfrom(socketid,recvmsg,sizeof(struct packet),0,(struct sockaddr *)&recvd_addr, &addr_size) ;
-         //printf("got %d %d %d\n",somen,expected,recvmsg->seq );
          if (somen > 0 && expected == recvmsg->seq){
             printf("currently received:- %d %d %d %d\n",recvmsg->ack,recvmsg->msglen,recvmsg->cc_option,recvmsg->options);
             buffer.push_back(recvmsg);
@@ -156,13 +157,15 @@ class TTCP{
       }
    }
 
+
+   //Function to process data
    void process_packet(){
       struct packet *recvmsg = (struct packet *)malloc(sizeof(struct packet));
       int checksum=0, csum,CC_cache;
       struct sockaddr_in *temp_addr;
       int tao = 0;
 
-      while(1) { //while(conn)
+      while(1) { 
          
          if (!buffer.empty()){
             tao = 0;
@@ -192,7 +195,6 @@ class TTCP{
 
                   if (recvmsg->cc_option == cc){
                      
-                     //cout<<findthis;
                      auto it = find (ips_ports.begin(), ips_ports.end(), findthis);
                      auto pos = distance(ips_ports.begin(), it);
                      CC_cache = prev_cc[pos];
@@ -327,14 +329,14 @@ class TTCP{
          }    
           
       }
-      // string tab = "update ccount set cc="+to_string(CCgen)+" where ip=\"global\"";
-      // if(mysql_query(conn, tab.c_str())!=0)
-      //    cout<<mysql_error(conn)<<endl<<endl;
+      
       return ;
    }  
 
 };      
   
+
+// Main Function
 int main(){
 
    const char* serverip = "127.0.0.1";

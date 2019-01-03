@@ -15,19 +15,13 @@
 #include <malloc.h>
 #include <vector>
 #include <iostream>
-// #include <mysql/mysql.h>
-// #include <cstdio>
 #include <string>
 
 
 using namespace std;
 
-/*struct control_block{
-   int CCsend;
-   int CCrecv;
-   int conn_active;
-};*/
 
+// Data Structures 
 enum option_names{
    syn,
    fin,
@@ -44,7 +38,6 @@ enum option_names{
    cc,
    lastack
 };
-//client will not recieve syn,syn_fin,data,cc_new
 
 struct packet{
    int src_port;
@@ -65,10 +58,6 @@ struct packet{
 class TTCP{
    public:  
    int CCgen, CCsend, CCrecv;
-   // MYSQL *conn;
-   // MYSQL_RES *res;
-   // MYSQL_ROW row;
-
    int socketid;
    int wndw;
    int acked;
@@ -83,26 +72,12 @@ class TTCP{
    int waiting;
    int flag;
 
+   // Initializing
    TTCP(const char* serverip){
-      // char *server = "127.0.0.1";
-      // char *user = "root";
-      // char *password = "begood";
-      // char *database = "ttcp_sample";
-      // conn = mysql_init(NULL);
-      // mysql_real_connect(conn, server, user, password, database, 0, NULL, 0);
-
-
-      // //read your global count on start
-      // string tab = "select cc from ccount1 where ip=\"global\"";
-      // mysql_query(conn, tab.c_str());
-      // res = mysql_use_result(conn);
-      // row = mysql_fetch_row(res);
-      // CCgen = strtol(row[0],NULL,0);
-      // printf("%d\n", CCgen);
+      
       CCgen = 0;
       CCrecv = 0;
       CCsend = CCgen;
-
       socketid = 0;
       wndw = 5;
       acked = -1;
@@ -143,6 +118,8 @@ class TTCP{
    
    } //end of constructor
 
+
+   // Function to read
    void thdread(){
       struct packet *recvmsg = (struct packet *)malloc(sizeof(struct packet));
       int somen, expected=0, checksum=0;
@@ -208,6 +185,7 @@ class TTCP{
       return ;
    }  
 
+   // Function to write
    void thdsend(){
       int iter = 0;
       int i, csum=0; 
@@ -272,16 +250,13 @@ class TTCP{
             resend = 0;
          }        
       }
-       
-      // string tab = "update ccount1 set cc="+to_string(CCgen)+" where ip=\"global\"";
-      // if(mysql_query(conn, tab.c_str())!=0)
-      //    cout<<mysql_error(conn)<<endl<<endl;
-                  
+             
       return;
    }
 };      
   
 
+// Main Function
 int main(){
 
    const char* serverip = "127.0.0.1";
